@@ -1,0 +1,3 @@
+#!/bin/bash
+source "$(dirname "$0")/prefs"
+jq -r 'if .type=="upstream" then "\(.type),channel=\(.channel) power=\(.power) \(.time)" elif .type=="downstream" then "\(.type),channel=\(.channel) snr=\(.snr),power=\(.power) \(.time)" elif .type=="codewords" then "\(.type),channel=\(.channel) unerrored=\(.unerrored),correctable=\(.correctable),uncorrectable=\(.uncorrectable) \(.time)" elif .type=="log" then "\(.type),priority=\(.priority),code=\(.code) message=\"\(.message)\" \(.time)" else empty end' | curl -XPOST "http://$influxdb/write?db=cableModemStats&precision=s" --data-binary @-

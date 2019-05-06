@@ -1,0 +1,4 @@
+#!/bin/bash
+source "$(dirname "$0")/prefs"
+curl http://192.168.100.1/cmSignalData.htm -s | pup 'tbody json{}' | jq '(now|floor) as $now|map(.children|del(.[0])|map(.children|map(.text)|del(.[0]))|transpose|map(.[2]|=sub(" .*";"")|.[4]|=sub(" .*";"")?//.))|(.[0][]|{type:"downstream",channel:.[0],snr:.[2],power:.[4],time:$now}),(.[1][]|{type:"upstream",channel:.[0],power:.[4],time:$now}),(.[2][]|{type:"codewords",channel:.[0],unerrored:.[1],correctable:.[2],uncorrectable:.[3],time:$now})'
+curl http://192.168.100.1/cmLogsData.htm -s | pup 'tr json{}' | jq --arg offset $(TZ="$timezone" date +%z) 'del(.[0])|map(.children|map(.text)|.[0]|=(strptime("%b %d %Y %H:%M:%S")|mktime))|("\((($offset[1:3]|tonumber*3600)+($offset[3:5]|tonumber*60))*("\($offset[0:1])1"|tonumber))"|tonumber) as $offset|map(.[0]|=.-$offset)[]|{type:"log",priority:.[1],code:.[2],message:.[3],time:.[0]}'

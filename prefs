@@ -1,0 +1,2 @@
+timezone="America/Los_Angeles" #of the modem
+influxdb="127.0.0.1:8086"
